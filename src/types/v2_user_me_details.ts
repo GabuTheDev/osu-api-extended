@@ -252,6 +252,11 @@ export interface response {
   unranked_beatmapset_count: number;
 }
 
+export interface UserAuth extends response {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
 
 export interface types {
   /**

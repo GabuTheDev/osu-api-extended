@@ -2,7 +2,7 @@ import { execSync } from 'child_process';
 import readln from "readline";
 
 
-import { types as user_types } from '../types/v2_user_me_details';
+import { types as user_types, UserAuth } from '../types/v2_user_me_details';
 import { osu_mode, auth_scopes } from './types';
 import { request } from "../utility/request";
 
@@ -164,7 +164,7 @@ export const authorize_cli = async (clientId: number, clientSecret: string, redi
 
 export const build_url = (clientId: number, redirectUri: string, scope: auth_scopes, state?: string): string => {
   if (!Array.isArray(scope) || !scope) throw new Error('Scope must be an Array');
-  
+
   const url = new URL('https://osu.ppy.sh/oauth/authorize');
   const params: any = {
     client_id: clientId,
@@ -181,8 +181,8 @@ export const build_url = (clientId: number, redirectUri: string, scope: auth_sco
 };
 
 
-export const authorize = async (code: string, gamemode: osu_mode, clientId: number, clientSecret: string, redirectUri: string): Promise<user_types> => {
-  const { access_token } = await request('https://osu.ppy.sh/oauth/token', {
+export const authorize = async (code: string, gamemode: osu_mode, clientId: number, clientSecret: string, redirectUri: string): Promise<UserAuth> => {
+  const { access_token, refresh_token, expires_in } = await request('https://osu.ppy.sh/oauth/token', {
     method: 'POST',
     headers: {
       "Accept": "application/json",
@@ -200,5 +200,9 @@ export const authorize = async (code: string, gamemode: osu_mode, clientId: numb
 
 
   const user = await request(`https://osu.ppy.sh/api/v2/me/${gamemode}`, { params: { v2: access_token } });
+  user.access_token = access_token;
+  user.refresh_token = refresh_token;
+  user.expires_in = expires_in;
+
   return user;
 };
